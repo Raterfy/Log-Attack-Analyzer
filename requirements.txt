@@ -1,0 +1,2 @@
+## No external dependencies — built with Python 3.11+ standard library only
+## This is intentional: the tool works out-of-the-box on any system with Python 3

