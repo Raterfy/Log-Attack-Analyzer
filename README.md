@@ -16,46 +16,51 @@ A Python-based security log analysis tool that automatically detects attack patt
   - Indicators of Compromise (IOCs) extraction
   - Attack timeline visualization
   - Raw log evidence samples
+- **Attack scenario generator** for testing and demonstration
 - **Zero dependencies** — runs on Python 3.11+ standard library only
 
 ## Architecture
 
 ```
 log-analyzer/
-├── analyzer.py              # Main entry point & CLI
-├── report_generator.py      # HTML report builder
-├── parsers/                 # Log format parsers
-│   ├── base_parser.py       # Abstract base class
-│   ├── ssh_parser.py        # Linux auth.log parser
-│   ├── apache_parser.py     # Apache/Nginx access.log parser
-│   └── windows_parser.py    # Windows Event Log parser
-├── detectors/               # Attack detection modules
-│   ├── base_detector.py     # Alert dataclass & base class
-│   ├── bruteforce.py        # Brute-force login detection
-│   ├── network_scan.py      # Scanner & enumeration detection
-│   ├── sqli.py              # SQL injection detection
-│   └── powershell.py        # Suspicious PowerShell detection
-└── sample_logs/             # Test data
-    ├── auth.log             # SSH brute-force samples
-    ├── access.log           # Web scanning & SQLi samples
-    └── windows_events.log   # Windows attack samples
+├── analyzer.py                    # Main entry point & CLI
+├── report_generator.py            # HTML report builder
+├── generate_attack_scenario.py    # Multi-attack scenario generator
+├── parsers/                       # Log format parsers
+│   ├── base_parser.py             # Abstract base class
+│   ├── ssh_parser.py              # Linux auth.log parser
+│   ├── apache_parser.py           # Apache/Nginx access.log parser
+│   └── windows_parser.py          # Windows Event Log parser
+├── detectors/                     # Attack detection modules
+│   ├── base_detector.py           # Alert dataclass & base class
+│   ├── bruteforce.py              # Brute-force login detection
+│   ├── network_scan.py            # Scanner & enumeration detection
+│   ├── sqli.py                    # SQL injection detection
+│   └── powershell.py              # Suspicious PowerShell detection
+├── sample_logs/                   # Test data
+│   ├── auth.log                   # SSH brute-force samples
+│   ├── access.log                 # Web scanning & SQLi samples
+│   └── windows_events.log         # Windows attack samples
+├── requirements.txt
+└── .gitignore
 ```
 
 ## Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/log-analyzer.git
-cd log-analyzer
+git clone https://github.com/Raterfy/Log-Attack-Analyzer.git
+cd Log-Attack-Analyzer
 
-# Analyze all sample logs
-python analyzer.py -d sample_logs/
+# Analyze sample logs
+python3 analyzer.py -d sample_logs/
 
-# Analyze specific files
-python analyzer.py -f sample_logs/auth.log sample_logs/access.log
+# Generate a full attack scenario and analyze it
+python3 generate_attack_scenario.py
+python3 analyzer.py -d attack_scenario/ -o attack_report.html
 
-# Custom output path
-python analyzer.py -d sample_logs/ -o incident_report.html
+# Open the report
+open attack_report.html
 ```
 
 ## Usage
@@ -72,51 +77,81 @@ options:
   -o, --output OUTPUT   Output HTML report path (default: report.html)
 ```
 
+## Attack Scenario Generator
+
+The included `generate_attack_scenario.py` creates realistic logs simulating a full attack chain from 12 threat actors:
+
+| Actor | Type | Details |
+|---|---|---|
+| 203.0.113.50 | SSH brute-force | 45 attempts, succeeds as root |
+| 198.51.100.23 | SSH brute-force | 15 attempts |
+| 185.220.101.34 | SSH brute-force | 25 attempts (Tor exit node) |
+| 192.0.2.100 | SSH brute-force | 8 attempts spread over hours (evasion) |
+| 203.0.113.77 | Web scanning | Nmap — 33 paths |
+| 192.0.2.200 | Web scanning | Nikto — 20 paths |
+| 172.16.50.99 | Web scanning | DirBuster — 35 paths |
+| 198.51.100.44 | SQL injection | sqlmap — 20 payloads |
+| 45.33.32.156 | SQL injection | Manual — 3 payloads |
+| 172.16.0.50 | RDP brute-force | 20 attempts |
+| 10.99.88.77 | RDP brute-force | 12 attempts |
+| compromised_user | Post-exploitation | Mimikatz, AMSI bypass, AV disable, exfiltration |
+
+```bash
+python3 generate_attack_scenario.py
+python3 analyzer.py -d attack_scenario/ -o attack_report.html
+```
+
 ## Detection Details
 
 ### Brute-Force Detection (T1110)
-Counts failed login attempts per source IP using a sliding time window (default: 5 failed logins within 300 seconds). Severity scales with attempt count.
+Counts failed login attempts per source IP using a sliding time window (default: 5 failed logins within 300 seconds). Severity scales with attempt count:
+- 5-9 attempts → LOW
+- 10-19 → MEDIUM
+- 20-49 → HIGH
+- 50+ → CRITICAL
 
 ### Network Scanning Detection (T1595)
-Identifies scanning tools via user-agent strings (Nmap, Nikto, sqlmap, etc.) and detects path enumeration by tracking unique URI requests per IP.
+Identifies scanning tools via user-agent strings (Nmap, Nikto, sqlmap, DirBuster, gobuster, wfuzz) and detects path enumeration by tracking unique URI requests per IP (threshold: 15 unique paths or 3+ sensitive paths).
 
 ### SQL Injection Detection (T1190)
-Matches HTTP request URIs against 16 regex patterns covering UNION-based, time-based blind, error-based, and stacked query injection techniques.
+Matches HTTP request URIs against 16 regex patterns covering UNION-based, time-based blind, error-based, stacked query, and boolean-based injection techniques. URIs are URL-decoded before analysis.
 
 ### PowerShell Detection (T1059.001)
-Flags suspicious PowerShell patterns in Windows event logs including encoded commands, download cradles, credential dumping tools, and defense evasion techniques.
+Flags 19 suspicious PowerShell patterns in Windows event logs including encoded commands, download cradles (WebClient, Invoke-WebRequest), credential dumping (Mimikatz), defense evasion (AMSI bypass, AV disable), and reflective loading.
 
 ## Sample Output
-
-Running against the included sample logs:
 
 ```
 ============================================================
   LOG ATTACK ANALYZER — SOC Automation Tool
 ============================================================
 
-  [*] Parsing sample_logs/access.log (ApacheLogParser)...
-      -> 46 events extracted
-  [*] Parsing sample_logs/auth.log (SSHLogParser)...
-      -> 45 events extracted
-  [*] Parsing sample_logs/windows_events.log (WindowsEventParser)...
-      -> 18 events extracted
+  [*] Parsing attack_scenario/access.log (ApacheLogParser)...
+      -> 170 events extracted
+  [*] Parsing attack_scenario/auth.log (SSHLogParser)...
+      -> 106 events extracted
+  [*] Parsing attack_scenario/windows_events.log (WindowsEventParser)...
+      -> 57 events extracted
 
-  [+] Total events: 109
-
-──────────────────────────────────────────────────────────────
-  Running detection modules...
+  [+] Total events: 333
 
   [BruteforceDetector] 3 alert(s)
-  [NetworkScanDetector] 4 alert(s)
+    🔴 [CRITICAL] Brute-Force Attack from 203.0.113.50
+    🟠 [HIGH] Brute-Force Attack from 185.220.101.34
+    🟡 [MEDIUM] Brute-Force Attack from 198.51.100.23
+  [NetworkScanDetector] 7 alert(s)
   [SQLInjectionDetector] 1 alert(s)
-  [PowerShellDetector] 4 alert(s)
+  [PowerShellDetector] 8 alert(s)
 
   ============================================================
   ANALYSIS COMPLETE
   ============================================================
-  Total alerts:  12
-  Report saved:  report.html
+  Total alerts:  19
+  Critical:      5
+  High:          11
+  Medium:        3
+  Unique IPs:    7
+  Report saved:  attack_report.html
 ```
 
 ## Extending
