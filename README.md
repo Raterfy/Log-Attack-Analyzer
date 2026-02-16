@@ -25,7 +25,6 @@ A Python-based security log analysis tool that automatically detects attack patt
 log-analyzer/
 ├── analyzer.py                    # Main entry point & CLI
 ├── report_generator.py            # HTML report builder
-├── generate_attack_scenario.py    # Multi-attack scenario generator
 ├── parsers/                       # Log format parsers
 │   ├── base_parser.py             # Abstract base class
 │   ├── ssh_parser.py              # Linux auth.log parser
@@ -37,10 +36,12 @@ log-analyzer/
 │   ├── network_scan.py            # Scanner & enumeration detection
 │   ├── sqli.py                    # SQL injection detection
 │   └── powershell.py              # Suspicious PowerShell detection
-├── sample_logs/                   # Test data
-│   ├── auth.log                   # SSH brute-force samples
-│   ├── access.log                 # Web scanning & SQLi samples
-│   └── windows_events.log         # Windows attack samples
+├── sample_logs/                   # Static test data
+│   ├── auth.log
+│   ├── access.log
+│   └── windows_events.log
+├── tests/                         # Testing & simulation
+│   └── generate_attack_scenario.py
 ├── requirements.txt
 └── .gitignore
 ```
@@ -56,8 +57,8 @@ cd Log-Attack-Analyzer
 python3 analyzer.py -d sample_logs/
 
 # Generate a full attack scenario and analyze it
-python3 generate_attack_scenario.py
-python3 analyzer.py -d attack_scenario/ -o attack_report.html
+python3 tests/generate_attack_scenario.py
+python3 analyzer.py -d tests/attack_scenario/ -o attack_report.html
 
 # Open the report
 open attack_report.html
@@ -97,8 +98,8 @@ The included `generate_attack_scenario.py` creates realistic logs simulating a f
 | compromised_user | Post-exploitation | Mimikatz, AMSI bypass, AV disable, exfiltration |
 
 ```bash
-python3 generate_attack_scenario.py
-python3 analyzer.py -d attack_scenario/ -o attack_report.html
+python3 tests/generate_attack_scenario.py
+python3 analyzer.py -d tests/attack_scenario/ -o attack_report.html
 ```
 
 ## Detection Details

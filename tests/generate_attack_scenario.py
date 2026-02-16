@@ -10,9 +10,9 @@ Simulates a realistic attack chain from 12 threat actors:
   - RDP brute-force on Windows
   - Legitimate traffic for contrast
 
-Usage:
-    python3 generate_attack_scenario.py
-    python3 analyzer.py -d attack_scenario/ -o attack_report.html
+Usage (from project root):
+    python3 tests/generate_attack_scenario.py
+    python3 analyzer.py -d tests/attack_scenario/ -o attack_report.html
     open attack_report.html
 """
 
@@ -20,7 +20,8 @@ import os
 import random
 from datetime import datetime, timedelta
 
-OUTPUT_DIR = "attack_scenario"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "attack_scenario")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 BASE = datetime(2026, 2, 16, 6, 0, 0)

@@ -4,5 +4,5 @@ __pycache__/
 *.html
 .venv/
 venv/
-attack_scenario/
-cowrie_auth.log
+.DS_Store
+tests/attack_scenario/
